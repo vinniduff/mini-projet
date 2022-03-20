@@ -1,0 +1,138 @@
+---
+title: "Mini-Projet"
+author: "Vincent Dufresne, Benjamin Gosselin"
+output: 
+  html_notebook: 
+    toc: yes
+    toc_float: yes
+    collapsed: false
+    smooth_scroll: false
+    toc_depth: 4
+---
+
+
+# Installing dependencies
+```{r}
+#install.packages("tseries")
+#install.packages("tsbox")
+#install.packages("psych")
+library(tseries)
+library(tsbox)
+library(psych)
+```
+
+
+# Data Extraction
+```{r}
+xic <- get.hist.quote(instrument = "XIC.TO", start = "2013-04-15", end = "2022-03-11", quote = "AdjClose")
+xus <- get.hist.quote(instrument = "XUS.TO", start = "2013-04-15", end = "2022-03-11", quote = "AdjClose")
+```
+# Manipulating Data Frames
+
+We will first need to generate log returns and we also need to split data between estimation set and "out-of-sample"
+set which we will later use to analyze the performance the model.
+
+## Generating Log Returns
+```{r}
+#We generate log returns for all observations of XIC and XUS
+xic$logreturn <- log(xic$Adjusted)
+
+xus$logreturn <- log(xus$Adjusted)
+```
+
+## Creating data frames
+
+### XIC
+```{r}
+xic_df <- ts_df(xic[,1])
+colnames(xic_df) <- c("Date", "Adjusted")
+xic_df$logreturn <- log(xic_df$Adjusted)
+colnames(xic_df) <- c("Date", "Adjusted", "logreturn")
+head(xic_df)
+
+```
+
+### XUS
+```{r}
+xus_df <- ts_df(xus[,1])
+colnames(xus_df) <- c("Date", "Adjusted")
+xus_df$logreturn <- log(xus_df$Adjusted)
+colnames(xus_df) <- c("Date", "Adjusted", "logreturn")
+head(xus_df)
+```
+
+
+
+## Splitting data
+
+```{r}
+#Estimation set size
+est_size = 2000
+
+#Test set size
+test_size <- length(xic[,1]) - est_size
+```
+
+
+### XIC
+```{r}
+#Estimation set
+xic_est <- xic[1:est_size,]
+xic_est_df <- xic_df[1:est_size,]
+
+#Test set
+xic_test <- xic[-(1:est_size),]
+xic_test_df <- xic_df[-(1:est_size),]
+
+#Checking lengths are ok
+length(xic_est[,1]) + length(xic_test[,1]) == length(xic[,1])
+
+```
+
+
+
+### XUS
+```{r}
+#Estimation set
+xus_est <- xus[1:est_size,]
+xus_est_df <- xus_df[1:est_size,]
+
+#Test set
+xus_test <- xus[-(1:est_size),]
+xus_test_df <- xus_df[-(1:est_size),]
+
+#Checking lengths are ok
+length(xus_est[,1]) + length(xus_test[,1]) == length(xus[,1])
+
+```
+
+# Analyzing Data
+
+## Summary of series
+
+### XUS
+
+#### Full set
+```{r}
+describe(xic[, 1:2])
+plot(xic)
+par(mfrow=c(1,2))
+plot(x=xic_df$Date, y=xic_df$Adjusted, type='l', xlab="Date", ylab=name, main=paste0(name, " as a function of Date"))
+plot(x=xic_df$Date, y=xic_df$logreturn, type='l', xlab="Date", ylab=name, main=paste0(name, " as a function of Date"))
+
+```
+
+
+### XIC
+```{r}
+describe(xus[,1:2])
+
+```
+
+
+
+
+```{r}
+
+```
+
