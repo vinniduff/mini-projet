@@ -49,8 +49,8 @@ colnames(xic_df) <- c("Date", "Adjusted")
 xic_df$logreturn <- log(xic_df$Adjusted)
 colnames(xic_df) <- c("Date", "Adjusted", "logreturn")
 head(xic_df)
-
 ```
+
 
 ### XUS
 ```{r}
@@ -110,11 +110,13 @@ length(xus_est[,1]) + length(xus_test[,1]) == length(xus[,1])
 
 ## Summary of series
 
-### XUS
+### XIC
 
 #### Full set
 ```{r}
-describe(xic[, 1:2])
+desc <- describe(xic[, 1:2])
+desc$excess_kur <- desc$kurtosis - 3
+desc
 plot(xic)
 par(mfrow=c(1,2))
 plot(x=xic_df$Date, y=xic_df$Adjusted, type='l', xlab="Date", ylab="Adjusted", main="Ajdusted as a function of Date")
@@ -124,7 +126,9 @@ plot(x=xic_df$Date, y=xic_df$logreturn, type='l', xlab="Date", ylab="logreturn",
 
 #### Estimation set
 ```{r}
-describe(xic_est[, 1:2])
+desc <- describe(xic_est[, 1:2])
+desc$excess_kur <- desc$kurtosis - 3
+desc
 plot(xic_est)
 par(mfrow=c(1,2))
 plot(x=xic_est_df$Date, y=xic_est_df$Adjusted, type='l', xlab="Date", ylab="Adjusted", main="Ajdusted as a function of Date")
@@ -135,7 +139,9 @@ plot(x=xic_est_df$Date, y=xic_est_df$logreturn, type='l', xlab="Date", ylab="log
 
 #### Test set
 ```{r}
-describe(xic_test[, 1:2])
+desc <- describe(xic_test[, 1:2])
+desc$excess_kur <- desc$kurtosis - 3
+desc
 plot(xic_test)
 par(mfrow=c(1,2))
 plot(x=xic_test_df$Date, y=xic_test_df$Adjusted, type='l', xlab="Date", ylab="Adjusted", main="Ajdusted as a function of Date")
@@ -145,28 +151,41 @@ plot(x=xic_test_df$Date, y=xic_test_df$logreturn, type='l', xlab="Date", ylab="l
 
 
 
-### XIC
+### XUS
 
 #### Full set
 ```{r}
-describe(xus[,1:2])
+desc <- describe(xus[,1:2])
+desc$excess_kur <- desc$kurtosis - 3
+desc
 plot(xus)
+par(mfrow=c(1,2))
+plot(x=xus_df$Date, y=xus_df$Adjusted, type='l', xlab="Date", ylab="Adjusted", main="Ajdusted as a function of Date")
+plot(x=xus_df$Date, y=xus_df$logreturn, type='l', xlab="Date", ylab="logreturn", main="logreturn as a function of Date")
 ```
 
 
 #### Estimation set
 ```{r}
-describe(xus_est[,1:2])
+desc <- describe(xus_est[, 1:2])
+desc$excess_kur <- desc$kurtosis - 3
+desc
 plot(xus_est)
+par(mfrow=c(1,2))
+plot(x=xus_est_df$Date, y=xus_est_df$Adjusted, type='l', xlab="Date", ylab="Adjusted", main="Ajdusted as a function of Date")
+plot(x=xus_est_df$Date, y=xus_est_df$logreturn, type='l', xlab="Date", ylab="logreturn", main="logreturn as a function of Date")
 ```
 
 #### Test set
 ```{r}
-describe(xus_test[,1:2])
+desc <- describe(xus_test[, 1:2])
+desc$excess_kur <- desc$kurtosis - 3
+desc
 plot(xus_test)
+par(mfrow=c(1,2))
+plot(x=xus_test_df$Date, y=xus_test_df$Adjusted, type='l', xlab="Date", ylab="Adjusted", main="Ajdusted as a function of Date")
+plot(x=xus_test_df$Date, y=xus_test_df$logreturn, type='l', xlab="Date", ylab="logreturn", main="logreturn as a function of Date")
 ```
-
-
 
 
 ```{r}
