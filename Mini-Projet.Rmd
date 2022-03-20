@@ -117,16 +117,31 @@ length(xus_est[,1]) + length(xus_test[,1]) == length(xus[,1])
 describe(xic[, 1:2])
 plot(xic)
 par(mfrow=c(1,2))
-plot(x=xic_df$Date, y=xic_df$Adjusted, type='l', xlab="Date", ylab=name, main=paste0(name, " as a function of Date"))
-plot(x=xic_df$Date, y=xic_df$logreturn, type='l', xlab="Date", ylab=name, main=paste0(name, " as a function of Date"))
+plot(x=xic_df$Date, y=xic_df$Adjusted, type='l', xlab="Date", ylab="Adjusted", main="Ajdusted as a function of Date")
+plot(x=xic_df$Date, y=xic_df$logreturn, type='l', xlab="Date", ylab="logreturn", main="logreturn as a function of Date")
 
 ```
 
 
 ### XIC
+
+#### Full set
 ```{r}
 describe(xus[,1:2])
+plot(xus)
+```
 
+
+#### Estimation set
+```{r}
+describe(xus_est[,1:2])
+plot(xus_est)
+```
+
+#### Test set
+```{r}
+describe(xus_test[,1:2])
+plot(xus_test)
 ```
 
 
