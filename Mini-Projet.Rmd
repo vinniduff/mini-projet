@@ -187,7 +187,7 @@ plot(x=xus_test_df$Date, y=xus_test_df$Adjusted, type='l', xlab="Date", ylab="Ad
 plot(x=xus_test_df$Date, y=xus_test_df$logreturn, type='l', xlab="Date", ylab="logreturn", main="logreturn as a function of Date")
 ```
 
-
+#Models
 ```{r}
 
 ```
