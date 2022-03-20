@@ -122,6 +122,28 @@ plot(x=xic_df$Date, y=xic_df$logreturn, type='l', xlab="Date", ylab="logreturn",
 
 ```
 
+#### Estimation set
+```{r}
+describe(xic_est[, 1:2])
+plot(xic_est)
+par(mfrow=c(1,2))
+plot(x=xic_est_df$Date, y=xic_est_df$Adjusted, type='l', xlab="Date", ylab="Adjusted", main="Ajdusted as a function of Date")
+plot(x=xic_est_df$Date, y=xic_est_df$logreturn, type='l', xlab="Date", ylab="logreturn", main="logreturn as a function of Date")
+```
+
+
+
+#### Test set
+```{r}
+describe(xic_test[, 1:2])
+plot(xic_test)
+par(mfrow=c(1,2))
+plot(x=xic_test_df$Date, y=xic_test_df$Adjusted, type='l', xlab="Date", ylab="Adjusted", main="Ajdusted as a function of Date")
+plot(x=xic_test_df$Date, y=xic_test_df$logreturn, type='l', xlab="Date", ylab="logreturn", main="logreturn as a function of Date")
+
+```
+
+
 
 ### XIC
 
