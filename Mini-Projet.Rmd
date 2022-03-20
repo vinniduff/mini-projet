@@ -188,6 +188,18 @@ plot(x=xus_test_df$Date, y=xus_test_df$logreturn, type='l', xlab="Date", ylab="l
 ```
 
 #Models
+
+## Gaussian
+
+$$r_{i,t} = \mu_i + \sigma_{i,t}\epsilon_{i,t},\space where \space \epsilon_{i,t} \sim N(0,1)$$
+```{r}
+
+```
+
+
+## Student-t
+
+$$r_{i,t} = \mu_i + \sigma_{i,t}\epsilon_{i,t},\space where \space \epsilon_{i,t} \sim t_{\nu i}$$
 ```{r}
 
 ```
