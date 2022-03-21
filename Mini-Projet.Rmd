@@ -19,6 +19,7 @@ output:
 library(tseries)
 library(tsbox)
 library(psych)
+library(copula)
 ```
 
 
@@ -187,13 +188,74 @@ plot(x=xus_test_df$Date, y=xus_test_df$Adjusted, type='l', xlab="Date", ylab="Ad
 plot(x=xus_test_df$Date, y=xus_test_df$logreturn, type='l', xlab="Date", ylab="logreturn", main="logreturn as a function of Date")
 ```
 
-#Models
+# Models
 
 ## Gaussian
 
 $$r_{i,t} = \mu_i + \sigma_{i,t}\epsilon_{i,t},\space where \space \epsilon_{i,t} \sim N(0,1)$$
 
+### Model Estimation
+
+We know R has a function to model garch models for data of ts type (time series) so we will use it. To get more info on how to use the function one can run the next chunk of code
+```{r}
+#install.packages("rugarch")
+library(rugarch)
+library(xts)
+?rugarch
+```
+
+#### Model Specifications
+```{r}
+ug_gauss <- ugarchspec()
+
+```
+
+
+
+Once we are familiarized, we can fit our model
+
+#### XIC
+
+```{r}
+lr_xic <- as.xts(xic_est$logreturn)
+ugfit_xic <- ugarchfit(spec = ug_gauss, data = lr_xic)
+
+ugfit_xic@fit$coef
+ug_xic_var <- ugfit_xic@fit$var
+ug_xic_res2 <- (ugfit_xic@fit$residuals)^2
+
+plot(ug_xic_res2)
+lines(ug_xic_var, col='green')
+```
+
+
+
+
+#### XUS
+
+```{r}
+lr_xus <- as.xts(xus_est$logreturn)
+ugfit_xus <- ugarchfit(spec = ug_gauss, data = lr_xus)
+
+ugfit_xus@fit$coef
+ug_xus_var <- ugfit_xus@fit$var
+ug_xus_res2 <- (ugfit_xus@fit$residuals)^2
+
+plot(ug_xus_res2)
+lines(ug_xus_var, col='green')
+```
+
+
+
 ### Copulas
+
+```{r}
+lr <- xic_est
+lr$Adjusted <- xus_est$logreturn
+colnames(lr) <- c("xus", "xic")
+lr <- as.xts(lr)
+```
+
 
 
 
