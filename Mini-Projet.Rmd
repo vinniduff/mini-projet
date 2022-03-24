@@ -207,7 +207,6 @@ library(xts)
 #### Model Specifications
 ```{r}
 ug_gauss <- ugarchspec()
-
 ```
 
 
@@ -241,7 +240,7 @@ ugfit_xus@fit$coef
 ug_xus_var <- ugfit_xus@fit$var
 ug_xus_res2 <- (ugfit_xus@fit$residuals)^2
 
-plot(ug_xus_res2)
+plot(ug_xus_res2, ylim=c(0,0.04))
 lines(ug_xus_var, col='green')
 ```
 
@@ -254,6 +253,11 @@ lr <- xic_est
 lr$Adjusted <- xus_est$logreturn
 colnames(lr) <- c("xus", "xic")
 lr <- as.xts(lr)
+df <- data.frame(lr)
+#plot(x=df$xus, y=df$xic, xlab="XUS", ylab="XIC", main="XIC as a function of XUS")
+plot(df)
+
+cor(lr)
 ```
 
 
@@ -262,7 +266,7 @@ lr <- as.xts(lr)
 #### Gaussian
 
 ```{r}
-
+gauss_cop <- 
 ```
 
 
