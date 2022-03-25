@@ -147,6 +147,10 @@ desc
 
 plot(xic_est)
 
+JB_xus <- jarque.bera.test(xus$logret)
+
+JB_xus
+
 plot(x=xic_est_df$Date, y=xic_est_df$logret, type='l', xlab="Date", ylab="logreturn", main="logreturn as a function of Date")
 ```
 
@@ -348,7 +352,7 @@ $$r_{i,t} = \mu_i + \sigma_{i,t}\epsilon_{i,t},\space where \space \epsilon_{i,t
 
 
 ```{r}
-ugspec_t <- ugarchspec(distribution.model = "std", mean.model = list(armaOrder = c(1,0)))
+ugspec_t <- ugarchspec(distribution.model = "std", mean.model = list(armaOrder = c(0,0)))
 ugspec_t
 ```
 
@@ -471,6 +475,9 @@ ptf_est$ptf_ret <- w_xic * ptf_est$xic + w_xus * ptf_est$xus
 
 ptf_est
 
+JB_ptf <- jarque.bera.test(ptf_est$ptf_ret)
+JB_ptf
+
 par(mfrow=c(1,2))
 
 qplot(ptf_est$ptf_ret , geom = 'histogram') + geom_histogram(fill = 'lightblue' , bins = 30) +
@@ -481,6 +488,17 @@ library(ggplot2)
 qplot(ptf_est$ptf_ret , geom = 'histogram') + geom_histogram(fill = 'lightblue' , bins = 30) +
     geom_histogram(aes(ptf_est$ptf_ret[ptf_est$ptf_ret < quantile(ptf_est$ptf_ret , 0.01)]) , fill = 'red' , bins = 30) +
     labs(x = 'Daily logReturns')
+
+```
+$$VaR_t = \mu + \sigma_{t-1}*Z_p$$
+```{r}
+coef(ugfit_xic)
+mean_pred_xic <- sigma(ugfit_xic)
+mean_pred_xic
+
+garchforecast_xic <- ugarchforecast(fitORspec = ugfit_xic, n.ahead = 234)
+
+#garchforecast_xic
 
 ```
 
