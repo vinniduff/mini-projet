@@ -277,6 +277,8 @@ p_res <- data.frame(p_xic_res)
 
 p_res$p_xus_res <- p_xus_res
 
+p_res
+
 cor(p_res, method="kendall")
 ```
 
@@ -325,7 +327,13 @@ frank_cop_mpl
 #### Clayton
 
 ```{r}
+clay_cop <- claytonCopula(param = 2, dim = 2)
 
+clayton_cop_ml <- fitCopula(clay_cop, data = p_res, method = "ml")
+clayton_cop_mpl <- fitCopula(clay_cop, data = p_res, method = "mpl")
+
+clayton_cop_ml
+clayton_cop_mpl
 ```
 
 
@@ -341,45 +349,75 @@ ugspec_t
 
 #### XIC
 ```{r}
-ug_fit_t_xic <- ugarchfit(spec=ugspec_t, data=lr_xic)
+ugfit_t_xic <- ugarchfit(spec=ugspec_t, data=lr_xic)
 
-ug_fit_t_xic
+ugfit_t_xic
 ```
 
 
 #### XUS
 ```{r}
+ugfit_t_xus <- ugarchfit(spec = ugspec_t, data = lr_xus)
 
+ugfit_t_xus
 ```
 
-
 ### Copulas
+
+
+```{r}
+p_xic_t_res <- pobs(ugfit_t_xic@fit$residuals)
+p_xus_t_res <- pobs(ugfit_t_xus@fit$residuals)
+
+p_res_t <- data.frame(p_xic_t_res)
+
+p_res_t$p_xus_res <- p_xus_t_res
+
+p_res_t
+
+cor(p_res_t, method="kendall")
+```
 
 
 #### Gaussian
 
 ```{r}
+gauss_cop_t = normalCopula(param = 0.1, dim = 2)
 
+gaussian_cop_t_ml <- fitCopula(gauss_cop_t, data = p_res_t, method = "ml")
+gaussian_cop_t_mpl <- fitCopula(gauss_cop_t, data = p_res_t, method = "mpl")
+
+gaussian_cop_t_ml
+gaussian_cop_t_mpl
 ```
 
 #### Student-t
 
 ```{r}
+t_cop_t <- tCopula(param = 0.1, dim = 2, df = 2, df.fixed = TRUE)
 
+student_cop_ml_t <- fitCopula(t_cop_t, data = p_res_t, method = "ml")
+student_cop_ml_t
 ```
 
 
 #### Frank
 
 ```{r}
+fr_cop_t <- frankCopula(param = 0.1, dim = 2)
 
+frank_cop_ml_t <- fitCopula(fr_cop_t, data = p_res_t, method = "ml")
+frank_cop_ml_t
 ```
 
 
 #### Clayton
 
 ```{r}
+cl_cop_t <- claytonCopula(param = 0.1, dim = 2)
 
+clayton_cop_ml_t <- fitCopula(cl_cop_t, data = p_res_t, method = "ml")
+clayton_cop_ml_t
 ```
 
 
