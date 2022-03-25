@@ -290,8 +290,8 @@ cor(p_res, method="kendall")
 g_cop <- normalCopula(param = 0.1, dim = 2)
 g_cop
 
-gauss_cop_ml <- fitCopula(cop, data = p_res, method="ml")
-gauss_cop_mpl <- fitCopula(cop, data = p_res, method="mpl")
+gauss_cop_ml <- fitCopula(g_cop, data = p_res, method="ml")
+gauss_cop_mpl <- fitCopula(g_cop, data = p_res, method="mpl")
 gauss_cop_ml
 gauss_cop_mpl
 ```
@@ -373,7 +373,7 @@ p_res_t <- data.frame(p_xic_t_res)
 
 p_res_t$p_xus_res <- p_xus_t_res
 
-p_res_t
+plot(p_res_t)
 
 cor(p_res_t, method="kendall")
 ```
@@ -427,4 +427,39 @@ BIC <- log(length(p_res_t[,1])) - 2*as.numeric(llike)
 BIC
 ```
 
+
+
+# VaR Forecasting
+
+## Estimation portfolio
+
+### Graphical VaR
+```{r}
+library(ggplot2)
+
+w_xic <- 0.5
+w_xus <- 1 - w_xic
+
+ptf_est <- data.frame(lr_xic)
+
+ptf_est$xus <- lr_xus
+
+colnames(ptf_est) <- c("xic", "xus")
+
+ptf_est$ptf_ret <- w_xic * ptf_est$xic + w_xus * ptf_est$xus
+
+ptf_est
+
+par(mfrow=c(1,2))
+
+qplot(ptf_est$ptf_ret , geom = 'histogram') + geom_histogram(fill = 'lightblue' , bins = 30) +
+    geom_histogram(aes(ptf_est$ptf_ret[ptf_est$ptf_ret < quantile(ptf_est$ptf_ret , 0.05)]) , fill = 'red' , bins = 30) +
+    labs(x = 'Daily logReturns')
+
+library(ggplot2)
+qplot(ptf_est$ptf_ret , geom = 'histogram') + geom_histogram(fill = 'lightblue' , bins = 30) +
+    geom_histogram(aes(ptf_est$ptf_ret[ptf_est$ptf_ret < quantile(ptf_est$ptf_ret , 0.01)]) , fill = 'red' , bins = 30) +
+    labs(x = 'Daily logReturns')
+
+```
 
