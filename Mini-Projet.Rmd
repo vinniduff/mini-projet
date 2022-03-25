@@ -16,6 +16,7 @@ output:
 #install.packages("tseries")
 #install.packages("tsbox")
 #install.packages("psych")
+library(xts)
 library(tseries)
 library(tsbox)
 library(psych)
@@ -36,30 +37,40 @@ set which we will later use to analyze the performance the model.
 ## Generating Log Returns
 ```{r}
 #We generate log returns for all observations of XIC and XUS
-xic$logreturn <- log(xic$Adjusted)
+xic <- ts_df(xic)
+xus <- ts_df(xus)
 
-xus$logreturn <- log(xus$Adjusted)
-```
+colnames(xic) <- c("Date", "Adjusted")
+colnames(xus) <- c("Date", "Adjusted")
 
-## Creating data frames
+xic$logprice <- log(xic$Adjusted)
+xus$logprice <- log(xus$Adjusted)
 
-### XIC
-```{r}
-xic_df <- ts_df(xic[,1])
-colnames(xic_df) <- c("Date", "Adjusted")
-xic_df$logreturn <- log(xic_df$Adjusted)
-colnames(xic_df) <- c("Date", "Adjusted", "logreturn")
-head(xic_df)
-```
+xic_log_ret <- c()
 
+for (i in 1:(length(xic$Adjusted)-1)){
+  log_ret <- as.numeric(xic[i+1,2]) - as.numeric(xic[i,2])
+  xic_log_ret <- c(xic_log_ret, log_ret)
+}
 
-### XUS
-```{r}
-xus_df <- ts_df(xus[,1])
-colnames(xus_df) <- c("Date", "Adjusted")
-xus_df$logreturn <- log(xus_df$Adjusted)
-colnames(xus_df) <- c("Date", "Adjusted", "logreturn")
-head(xus_df)
+xic_log_ret <- c(0, xic_log_ret)
+xic$logret <- xic_log_ret
+
+xic
+
+xus_log_ret <- c()
+
+for (i in 1:(length(xus$Adjusted)-1)){
+  log_ret <- as.numeric(xus[i+1,2]) - as.numeric(xus[i,2])
+  xus_log_ret <- c(xus_log_ret, log_ret)
+}
+
+xus_log_ret <- c(0, xus_log_ret)
+
+xus$logret <- xus_log_ret
+
+xus
+
 ```
 
 
@@ -71,7 +82,7 @@ head(xus_df)
 est_size = 2000
 
 #Test set size
-test_size <- length(xic[,1]) - est_size
+test_size <- length(xic[,4]) - est_size
 ```
 
 
@@ -79,11 +90,11 @@ test_size <- length(xic[,1]) - est_size
 ```{r}
 #Estimation set
 xic_est <- xic[1:est_size,]
-xic_est_df <- xic_df[1:est_size,]
+xic_est_df <- xic[1:est_size,]
 
 #Test set
 xic_test <- xic[-(1:est_size),]
-xic_test_df <- xic_df[-(1:est_size),]
+xic_test_df <- xic[-(1:est_size),]
 
 #Checking lengths are ok
 length(xic_est[,1]) + length(xic_test[,1]) == length(xic[,1])
@@ -96,11 +107,11 @@ length(xic_est[,1]) + length(xic_test[,1]) == length(xic[,1])
 ```{r}
 #Estimation set
 xus_est <- xus[1:est_size,]
-xus_est_df <- xus_df[1:est_size,]
+xus_est_df <- xus[1:est_size,]
 
 #Test set
 xus_test <- xus[-(1:est_size),]
-xus_test_df <- xus_df[-(1:est_size),]
+xus_test_df <- xus[-(1:est_size),]
 
 #Checking lengths are ok
 length(xus_est[,1]) + length(xus_test[,1]) == length(xus[,1])
@@ -115,25 +126,24 @@ length(xus_est[,1]) + length(xus_test[,1]) == length(xus[,1])
 
 #### Full set
 ```{r}
-desc <- describe(xic[, 1:2])
+desc <- describe(xic[, c(2,4)])
 desc$excess_kur <- desc$kurtosis - 3
 desc
 plot(xic)
-par(mfrow=c(1,2))
-plot(x=xic_df$Date, y=xic_df$Adjusted, type='l', xlab="Date", ylab="Adjusted", main="Ajdusted as a function of Date")
-plot(x=xic_df$Date, y=xic_df$logreturn, type='l', xlab="Date", ylab="logreturn", main="logreturn as a function of Date")
+
+plot(x=xic$Date, y=xic$logret, type='l', xlab="Date", ylab="logreturn", main="logreturn as a function of Date")
 
 ```
 
 #### Estimation set
 ```{r}
-desc <- describe(xic_est[, 1:2])
+desc <- describe(xic_est[, c(2,4)])
 desc$excess_kur <- desc$kurtosis - 3
 desc
+
 plot(xic_est)
-par(mfrow=c(1,2))
-plot(x=xic_est_df$Date, y=xic_est_df$Adjusted, type='l', xlab="Date", ylab="Adjusted", main="Ajdusted as a function of Date")
-plot(x=xic_est_df$Date, y=xic_est_df$logreturn, type='l', xlab="Date", ylab="logreturn", main="logreturn as a function of Date")
+
+plot(x=xic_est_df$Date, y=xic_est_df$logret, type='l', xlab="Date", ylab="logreturn", main="logreturn as a function of Date")
 ```
 
 
@@ -143,10 +153,10 @@ plot(x=xic_est_df$Date, y=xic_est_df$logreturn, type='l', xlab="Date", ylab="log
 desc <- describe(xic_test[, 1:2])
 desc$excess_kur <- desc$kurtosis - 3
 desc
+
 plot(xic_test)
-par(mfrow=c(1,2))
-plot(x=xic_test_df$Date, y=xic_test_df$Adjusted, type='l', xlab="Date", ylab="Adjusted", main="Ajdusted as a function of Date")
-plot(x=xic_test_df$Date, y=xic_test_df$logreturn, type='l', xlab="Date", ylab="logreturn", main="logreturn as a function of Date")
+
+plot(x=xic_test_df$Date, y=xic_test_df$logret, type='l', xlab="Date", ylab="logreturn", main="logreturn as a function of Date")
 
 ```
 
@@ -159,10 +169,10 @@ plot(x=xic_test_df$Date, y=xic_test_df$logreturn, type='l', xlab="Date", ylab="l
 desc <- describe(xus[,1:2])
 desc$excess_kur <- desc$kurtosis - 3
 desc
+
 plot(xus)
-par(mfrow=c(1,2))
-plot(x=xus_df$Date, y=xus_df$Adjusted, type='l', xlab="Date", ylab="Adjusted", main="Ajdusted as a function of Date")
-plot(x=xus_df$Date, y=xus_df$logreturn, type='l', xlab="Date", ylab="logreturn", main="logreturn as a function of Date")
+
+plot(x=xus$Date, y=xus$logret, type='l', xlab="Date", ylab="logreturn", main="logreturn as a function of Date")
 ```
 
 
@@ -171,10 +181,10 @@ plot(x=xus_df$Date, y=xus_df$logreturn, type='l', xlab="Date", ylab="logreturn",
 desc <- describe(xus_est[, 1:2])
 desc$excess_kur <- desc$kurtosis - 3
 desc
+
 plot(xus_est)
-par(mfrow=c(1,2))
-plot(x=xus_est_df$Date, y=xus_est_df$Adjusted, type='l', xlab="Date", ylab="Adjusted", main="Ajdusted as a function of Date")
-plot(x=xus_est_df$Date, y=xus_est_df$logreturn, type='l', xlab="Date", ylab="logreturn", main="logreturn as a function of Date")
+
+plot(x=xus_est$Date, y=xus_est$logret, type='l', xlab="Date", ylab="logreturn", main="logreturn as a function of Date")
 ```
 
 #### Test set
@@ -183,9 +193,8 @@ desc <- describe(xus_test[, 1:2])
 desc$excess_kur <- desc$kurtosis - 3
 desc
 plot(xus_test)
-par(mfrow=c(1,2))
-plot(x=xus_test_df$Date, y=xus_test_df$Adjusted, type='l', xlab="Date", ylab="Adjusted", main="Ajdusted as a function of Date")
-plot(x=xus_test_df$Date, y=xus_test_df$logreturn, type='l', xlab="Date", ylab="logreturn", main="logreturn as a function of Date")
+
+plot(x=xus_test$Date, y=xus_test$logret, type='l', xlab="Date", ylab="logreturn", main="logreturn as a function of Date")
 ```
 
 # Models
@@ -216,10 +225,15 @@ Once we are familiarized, we can fit our model
 #### XIC
 
 ```{r}
-lr_xic <- as.xts(xic_est$logreturn)
+class(xic_est)
+
+lr_xic <- as.xts(xic_est$logret, order.by = xic_est$Date)
 ugfit_xic <- ugarchfit(spec = ug_gauss, data = lr_xic)
 
-ugfit_xic@fit$coef
+ugfit_xic
+
+plot(ugfit_xic@fit$fitted.values)
+
 ug_xic_var <- ugfit_xic@fit$var
 ug_xic_res2 <- (ugfit_xic@fit$residuals)^2
 
@@ -233,14 +247,16 @@ lines(ug_xic_var, col='green')
 #### XUS
 
 ```{r}
-lr_xus <- as.xts(xus_est$logreturn)
+lr_xus <- as.xts(xus_est$logret, order.by = xus_est$Date)
 ugfit_xus <- ugarchfit(spec = ug_gauss, data = lr_xus)
+
+ugfit_xus
 
 ugfit_xus@fit$coef
 ug_xus_var <- ugfit_xus@fit$var
 ug_xus_res2 <- (ugfit_xus@fit$residuals)^2
 
-plot(ug_xus_res2, ylim=c(0,0.04))
+plot(ug_xus_res2)
 lines(ug_xus_var, col='green')
 ```
 
@@ -249,38 +265,60 @@ lines(ug_xus_var, col='green')
 ### Copulas
 
 ```{r}
-lr <- xic_est
-lr$Adjusted <- xus_est$logreturn
-colnames(lr) <- c("xus", "xic")
-lr <- as.xts(lr)
-df <- data.frame(lr)
-#plot(x=df$xus, y=df$xic, xlab="XUS", ylab="XIC", main="XIC as a function of XUS")
-plot(df)
-
-cor(lr)
+plot(xic$logret, xus$logret, xlab="xic", ylab="xus")
+cor(xic$logret, xus$logret, method="kendall")
 ```
 
+```{r}
+p_xic_res <- pobs(ugfit_xic@fit$residuals)
+p_xus_res <- pobs(ugfit_xus@fit$residuals)
+
+p_res <- data.frame(p_xic_res)
+
+p_res$p_xus_res <- p_xus_res
+
+cor(p_res, method="kendall")
+```
 
 
 
 #### Gaussian
 
 ```{r}
-gauss_cop <- 
+g_cop <- normalCopula(param = 0.1, dim = 2)
+g_cop
+
+gauss_cop_ml <- fitCopula(cop, data = p_res, method="ml")
+gauss_cop_mpl <- fitCopula(cop, data = p_res, method="mpl")
+gauss_cop_ml
+gauss_cop_mpl
 ```
 
 
 #### Student-t
 
 ```{r}
+t_cop = tCopula(param = 0.1, dim = 2, df = 2, df.fixed = TRUE)
+t_cop
 
+student_cop_ml <- fitCopula(t_cop, data = p_res, method = "ml")
+student_cop_mpl <- fitCopula(t_cop, data = p_res, method = "mpl")
+
+student_cop_ml
+student_cop_mpl
 ```
 
 
 #### Frank
 
 ```{r}
+f_cop <- frankCopula(param = 0.1, dim = 2)
 
+frank_cop_ml <- fitCopula(f_cop, data = p_res, method = "ml")
+frank_cop_mpl <- fitCopula(f_cop, data = p_res, method = "mpl")
+
+frank_cop_ml
+frank_cop_mpl
 ```
 
 
@@ -294,6 +332,26 @@ gauss_cop <-
 ## Student-t
 
 $$r_{i,t} = \mu_i + \sigma_{i,t}\epsilon_{i,t},\space where \space \epsilon_{i,t} \sim t_{\nu i}$$
+
+
+```{r}
+ugspec_t <- ugarchspec(distribution.model = "std")
+ugspec_t
+```
+
+#### XIC
+```{r}
+ug_fit_t_xic <- ugarchfit(spec=ugspec_t, data=lr_xic)
+
+ug_fit_t_xic
+```
+
+
+#### XUS
+```{r}
+
+```
+
 
 ### Copulas
 
