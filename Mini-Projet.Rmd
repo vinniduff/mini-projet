@@ -131,6 +131,10 @@ desc$excess_kur <- desc$kurtosis - 3
 desc
 plot(xic)
 
+JB_xic <- jarque.bera.test(xic$logret)
+
+JB_xic
+
 plot(x=xic$Date, y=xic$logret, type='l', xlab="Date", ylab="logreturn", main="logreturn as a function of Date")
 
 ```
@@ -215,7 +219,7 @@ library(xts)
 
 #### Model Specifications
 ```{r}
-ug_gauss <- ugarchspec()
+ug_gauss <- ugarchspec(mean.model=list(armaOrder=c(0,0)))
 ```
 
 
@@ -279,6 +283,7 @@ p_res$p_xus_res <- p_xus_res
 
 p_res
 
+cov(p_res)
 cor(p_res, method="kendall")
 ```
 
@@ -343,7 +348,7 @@ $$r_{i,t} = \mu_i + \sigma_{i,t}\epsilon_{i,t},\space where \space \epsilon_{i,t
 
 
 ```{r}
-ugspec_t <- ugarchspec(distribution.model = "std")
+ugspec_t <- ugarchspec(distribution.model = "std", mean.model = list(armaOrder = c(1,0)))
 ugspec_t
 ```
 
@@ -360,6 +365,10 @@ ugfit_t_xic
 ugfit_t_xus <- ugarchfit(spec = ugspec_t, data = lr_xus)
 
 ugfit_t_xus
+
+e <- ugfit_t_xus@fit$residuals
+d <- e^2 - ugfit_t_xus@fit$sigma^2
+mean(d^2)
 ```
 
 ### Copulas
@@ -371,7 +380,13 @@ p_xus_t_res <- pobs(ugfit_t_xus@fit$residuals)
 
 p_res_t <- data.frame(p_xic_t_res)
 
-p_res_t$p_xus_res <- p_xus_t_res
+p_res_t$p_xus_t_res <- p_xus_t_res
+
+cov_p_res_t <- cov(p_res_t)
+
+cov_p_res_t
+
+var_p_res_t <- 0.5^2*cov_p_res_t[1,1] + 0.5^2*cov_p_res_t[2,2] + 2
 
 plot(p_res_t)
 
@@ -394,10 +409,13 @@ gaussian_cop_t_mpl
 #### Student-t
 
 ```{r}
-t_cop_t <- tCopula(param = 0.1, dim = 2, df = 2, df.fixed = TRUE)
+t_cop_t <- tCopula(param = 0.1, dim = 2, df = 2)
 
 student_cop_ml_t <- fitCopula(t_cop_t, data = p_res_t, method = "ml")
 student_cop_ml_t
+
+rcop <- rCopula(1000, student_cop_ml_t@copula)
+plot(rcop)
 ```
 
 
@@ -406,8 +424,11 @@ student_cop_ml_t
 ```{r}
 fr_cop_t <- frankCopula(param = 0.1, dim = 2)
 
-frank_cop_ml_t <- fitCopula(fr_cop_t, data = p_res_t, method = "ml")
-frank_cop_ml_t
+frank_cop_ml_t <- fitCopula(fr_cop_t, data = p_res_t, method = "ml", estimate.variance=TRUE)
+
+distribution <- rCopula(n=1000, frankCopula(param = as.numeric(frank_cop_ml_t@copula@parameters), dim = as.numeric(frank_cop_ml_t@copula@dimension)))
+
+plot(distribution)
 ```
 
 
