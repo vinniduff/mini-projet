@@ -418,6 +418,13 @@ cl_cop_t <- claytonCopula(param = 0.1, dim = 2)
 
 clayton_cop_ml_t <- fitCopula(cl_cop_t, data = p_res_t, method = "ml")
 clayton_cop_ml_t
+
+llike <- logLik(clayton_cop_ml_t)
+AIC <- 2*1 - 2*as.numeric(llike)
+AIC
+
+BIC <- log(length(p_res_t[,1])) - 2*as.numeric(llike)
+BIC
 ```
 
 
