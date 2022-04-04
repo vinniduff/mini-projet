@@ -16,11 +16,13 @@ output:
 #install.packages("tseries")
 #install.packages("tsbox")
 #install.packages("psych")
+#install.packages("PerformanceAnalytics")
 library(xts)
 library(tseries)
 library(tsbox)
 library(psych)
 library(copula)
+library(PerformanceAnalytics)
 ```
 
 
@@ -37,6 +39,16 @@ set which we will later use to analyze the performance the model.
 ## Generating Log Returns
 ```{r}
 #We generate log returns for all observations of XIC and XUS
+plot(xic)
+
+xic_ret <- diff(log(xic))
+
+xus_ret <- diff(log(xus))
+
+plot(ret)
+
+plot(xus_ret)
+
 xic <- ts_df(xic)
 xus <- ts_df(xus)
 
@@ -223,7 +235,7 @@ library(xts)
 
 #### Model Specifications
 ```{r}
-ug_gauss <- ugarchspec(mean.model=list(armaOrder=c(0,0)))
+ug_gauss <- ugarchspec(mean.model=list(armaOrder=c(1,1)))
 ```
 
 
@@ -352,7 +364,7 @@ $$r_{i,t} = \mu_i + \sigma_{i,t}\epsilon_{i,t},\space where \space \epsilon_{i,t
 
 
 ```{r}
-ugspec_t <- ugarchspec(distribution.model = "std", mean.model = list(armaOrder = c(0,0)))
+ugspec_t <- ugarchspec(distribution.model = "std", mean.model = list(armaOrder = c(1,0)))
 ugspec_t
 ```
 
@@ -439,17 +451,45 @@ plot(distribution)
 #### Clayton
 
 ```{r}
+ret_est <- ret[1:2000,]
+
+ret_test <- ret[-(1:2000),]
+
+ret_est
+
+```
+
+
+```{r}
 cl_cop_t <- claytonCopula(param = 0.1, dim = 2)
 
 clayton_cop_ml_t <- fitCopula(cl_cop_t, data = p_res_t, method = "ml")
-clayton_cop_ml_t
+#clayton_cop_ml_t
+
+alpha <- clayton_cop_ml_t@estimate
+alpha
+
+quantile(clayton_cop_ml_t)
+
+cdf <- clayton_cop_ml_t@copula@exprdist$cdf
+
+cdf <- as.expression(cdf)
+
+cdf
+
+calc_cdf <- function(u1, u2){
+  cdf <- (1 + (u1^(-alpha) - 1 + u2^(-alpha) - 1))^(-1/alpha)
+  return(cdf)
+}
+
+calc_cdf(0.15, 0.08)
 
 llike <- logLik(clayton_cop_ml_t)
 AIC <- 2*1 - 2*as.numeric(llike)
-AIC
+#AIC
 
 BIC <- log(length(p_res_t[,1])) - 2*as.numeric(llike)
-BIC
+#BIC
 ```
 
 
@@ -494,11 +534,38 @@ $$VaR_t = \mu + \sigma_{t-1}*Z_p$$
 ```{r}
 coef(ugfit_xic)
 mean_pred_xic <- sigma(ugfit_xic)
-mean_pred_xic
+#mean_pred_xic
 
 garchforecast_xic <- ugarchforecast(fitORspec = ugfit_xic, n.ahead = 234)
 
 #garchforecast_xic
 
 ```
+
+```{r}
+rcop <- rCopula(1000, gauss_cop_ml@copula)
+
+plot(rcop)
+
+ret <- xic[,c(1,4)]
+
+ret$lr_xus <- xus$logret
+
+colnames(ret) <- c("Date", "lr_xic", "lr_xus")
+
+ret <- as.xts(ret[,2:3], order.by = ret$Date)
+
+varisk <- VaR(ret)
+varisk
+
+vec_risk <- ret
+
+vec_risk[,1] <- rep(varisk[1], length(ret[,1]))
+vec_risk[,2] <- rep(varisk[2], length(ret[,2]))
+
+vec_risk
+
+v_a_R_plot <- VaRplot(0.05, ret, vec_risk)
+```
+
 
